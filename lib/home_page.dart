@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter/services.dart';
+import 'sidebar.dart';
+import 'map_page.dart';
+import 'data_visualization_page.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,32 +13,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Default to map page
   bool _isSidebarVisible = true;
   double _currentZoom = 13.0;
   final MapController _mapController = MapController();
-  LatLng _currentPosition = LatLng(22.580321, 113.938796); // 默认位置（大疆天空之城）
+  LatLng _currentPosition = LatLng(22.580321, 113.938796);
   bool _locationFetched = false;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    // 隐藏系统任务栏
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
   }
 
   Future<void> _getCurrentLocation() async {
     try {
-      // Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      // setState(() {
-      //   _currentPosition = LatLng(position.latitude, position.longitude);
-      //   _locationFetched = true;
-      // });
       Future.error("没有适配");
     } catch (e) {
       print("无法获取位置: $e");
-      // 如果无法获取位置，保持默认位置
     }
   }
 
@@ -44,66 +41,33 @@ class _HomePageState extends State<HomePage> {
       body: Row(
         children: <Widget>[
           if (_isSidebarVisible)
-            Container(
-              width: 200,
-              color: Colors.blueGrey[50],
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    color: Colors.blue,
-                    child: ListTile(
-                      leading: Icon(Icons.arrow_left),
-                      title: Text('隐藏'),
-                      onTap: () {
-                        setState(() {
-                          _isSidebarVisible = false;
-                        });
-                      },
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('Mountaion Fly Viz'),
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children: <Widget>[
-                        ListTile(
-                          title: Text('地图'),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 0;
-                            });
-                          },
-                        ),
-                        ListTile(
-                          title: Text('数据可视化'),
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = 1;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            Sidebar(
+              onHide: () => setState(() => _isSidebarVisible = false),
+              onSelectPage: (index) => setState(() => _selectedIndex = index),
+              selectedIndex: _selectedIndex,
             ),
           Expanded(
             child: Stack(
               children: [
-                _selectedIndex == 0 ? buildMap() : buildDataVisualization(),
+                if (_selectedIndex == 0)
+                  MapPage(_mapController, _currentPosition, _currentZoom, _locationFetched)
+                else if (_selectedIndex == 1)
+                  DataVisualizationPage()
+                else
+                  SettingsPage(),
                 if (!_isSidebarVisible)
                   Positioned(
                     top: 10,
                     left: 10,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        shape: CircleBorder(),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                         padding: EdgeInsets.all(20),
-                        backgroundColor: Colors.blue, // 背景颜色
+                        backgroundColor: Colors.blue,
                       ),
-                      child: Icon(Icons.arrow_right, size: 30, color: Colors.white),
+                      child: Icon(Icons.dehaze, size: 30, color: Colors.white),
                       onPressed: () {
                         setState(() {
                           _isSidebarVisible = true;
@@ -137,39 +101,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildMap() {
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        center: _currentPosition,
-        zoom: _currentZoom,
-        interactiveFlags: InteractiveFlag.all, // 启用所有交互手势
-      ),
-      children: [
-        TileLayer(
-          urlTemplate: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          subdomains: ['a', 'b', 'c'],
-        ),
-        MarkerLayer(
-          markers: [
-            Marker(
-              point: _locationFetched ? _currentPosition : LatLng(22.580321, 113.938796), // 显示当前位置或默认位置
-              builder: (ctx) => Container(
-                child: Icon(Icons.navigation, color: Colors.red, size: 40),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildDataVisualization() {
-    return Center(
-      child: Text('数据可视化页面'),
-    );
-  }
-
   void _zoomIn() {
     setState(() {
       _currentZoom++;
@@ -184,4 +115,3 @@ class _HomePageState extends State<HomePage> {
     });
   }
 }
-
