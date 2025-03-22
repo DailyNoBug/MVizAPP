@@ -203,14 +203,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_unity_widget:
-    dependency: "direct main"
-    description:
-      name: flutter_unity_widget
-      sha256: "88aca3d14b42d6ad665a9c7c31a2b3d2febd413b39d426340abc538907a9fe2c"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.2.5+1"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -517,14 +509,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.2"
-  stream_transform:
-    dependency: transitive
-    description:
-      name: stream_transform
-      sha256: "14a00e794c7c11aa145a170587321aedce29769c08d7f58b1d141da75e3b1c6f"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.1.0"
   string_scanner:
     dependency: transitive
     description:
